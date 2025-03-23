@@ -1,4 +1,5 @@
-import { Sheet } from "@mui/joy";
+
+import { Box } from "@mui/material";
 import Footer from "./footer";
 import Header from "./header";
 
@@ -8,7 +9,7 @@ export default function PageLayout (
     { children }: Readonly<{ children: React.ReactNode; }>
 ) {
     return (
-        <Sheet sx={{
+        <Box sx={{
             paddingLeft: 10,
             paddingRight: 10
         }}>
@@ -18,9 +19,7 @@ export default function PageLayout (
             <main className={styles.main}>
                 {children}
             </main>
-            <footer className={styles.footer}>
-                <Footer/>
-            </footer>
-        </Sheet>
+            <Footer/>
+        </Box>
     )
 }

@@ -1,6 +1,5 @@
-import { Sheet } from "@mui/joy";
 import styles from "@/app/page.module.css";
-import { Divider, Grid2, Typography } from "@mui/material";
+import { Divider, Grid2, Paper, Typography } from "@mui/material";
 import ProductCard, { ProductCardProps } from "./productCard";
 
 interface ProductsList {
@@ -10,18 +9,23 @@ export default function Marketplace (
     { products }: Readonly<ProductsList>
 ) {
     return (
-        <Sheet
-            component="div"
-            className={styles.marketplace}
+        <Paper
             sx={{
-                padding: 2
+                width: "100%",
+                padding: 2,
             }}
         >
-            <Typography variant="h4">Marketplace</Typography>
+            <Typography variant="h4"
+                sx={{
+                    marginTop: 1
+                }}
+            >
+                Marketplace
+            </Typography>
             <Divider sx={
                 {
                     marginBottom: 4,
-                    marginTop: 2
+                    marginTop: 1
                 }
             }/>
             <Grid2 container spacing={4}>
@@ -33,6 +37,6 @@ export default function Marketplace (
                 ))
             }
             </Grid2>
-        </Sheet>
+        </Paper>
     )
 }

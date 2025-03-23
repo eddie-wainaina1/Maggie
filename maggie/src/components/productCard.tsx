@@ -1,5 +1,4 @@
-import { Box, Sheet } from "@mui/joy";
-import { Rating, Typography } from "@mui/material";
+import { Box, Button, Paper, Rating, Typography } from "@mui/material";
 
 
 export interface ProductCardProps {
@@ -21,23 +20,27 @@ export default function ProductCard ({
     return (
         <Box
             sx={{
-                borderRadius: 10,
                 zIndex: 2,
-                border: "1px solid #ccc",
+                borderRadius: 10
             }}
         >
-            <Sheet sx={{
+            <Paper sx={{
                 display: "flex",
                 flexDirection: "column",
                 gap: 1,
-                margin: 2
+                padding: 1
             }}>
-                <img src={imageUrl} alt={`Product: ${title}`} height={150}/>
+                <img src={imageUrl} alt={`Product: ${title}`} height={392}/>
                 <Typography variant="h6">{title}</Typography>
                 <Typography variant="body1">{description}</Typography>
                 <Typography variant="body2">{currency} {price}</Typography>
                 <Rating name="rating" value={rating} readOnly/>
-            </Sheet>
+                <Button variant="contained">Add to cart</Button>
+            </Paper>
         </Box>
     );
 }
+///
+// await Promise.all(
+//     bicycles.map((bicycle, i) => client.json.set(`bicycle:${i}`, '$', bicycle))
+//   );

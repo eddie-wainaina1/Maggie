@@ -1,7 +1,17 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
+import {
+  ClerkProvider,
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton
+} from '@clerk/nextjs';
 import "./globals.css";
 import PageLayout from "@/components/pageLayout";
+import theme from "./theme";
+import { ThemeProvider } from "@mui/material/styles";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -25,12 +35,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <ClerkProvider>
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <PageLayout>
-          {children}
-        </PageLayout>
+        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+          <ThemeProvider theme={theme}>
+            <PageLayout>
+              {children}
+            </PageLayout>
+          </ThemeProvider>
+        </AppRouterCacheProvider>
       </body>
     </html>
+    </ClerkProvider>
   );
 }

@@ -1,12 +1,11 @@
-import { Product } from '@/db/schema';
+// import { Product } from '@/db/schema';
 
-const addImage = () => {
-    
-}
-const addProduct = (
-    name: string,
-    description: string,
-    price: string
-) => {
+// const addImage = () => {
+// }
+// const addProduct = (
+//     name: string,
+//     description: string,
+//     price: string
+// ) => {
 
-}
+// }
