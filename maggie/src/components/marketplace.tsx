@@ -1,5 +1,5 @@
 import styles from "@/app/page.module.css";
-import { Divider, Grid2, Paper, Typography } from "@mui/material";
+import { Box, Divider, Grid2, Typography } from "@mui/material";
 import ProductCard, { ProductCardProps } from "./productCard";
 
 interface ProductsList {
@@ -9,26 +9,18 @@ export default function Marketplace (
     { products }: Readonly<ProductsList>
 ) {
     return (
-        <Paper
+        <Box
             sx={{
                 width: "100%",
-                padding: 2,
+                padding: 1,
+                border: "none",
             }}
         >
-            <Typography variant="h4"
-                sx={{
-                    marginTop: 1
-                }}
-            >
+            <Typography variant="h4" sx={{paddingY: 2}}>
                 Marketplace
             </Typography>
-            <Divider sx={
-                {
-                    marginBottom: 4,
-                    marginTop: 1
-                }
-            }/>
-            <Grid2 container spacing={4}>
+
+            <Grid2 container spacing={3}>
             {
                 products.map((product, index) => (
                     <Grid2 key={`product-${index+1}`}>
@@ -37,6 +29,6 @@ export default function Marketplace (
                 ))
             }
             </Grid2>
-        </Paper>
+        </Box>
     )
 }

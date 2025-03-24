@@ -1,5 +1,6 @@
-import type { Product } from "@/types/srcTypes";
+import type { Product, ProductFields } from "@/types/srcTypes";
 import { Box, Button, Modal, TextField, Typography } from "@mui/material"
+import { useState, type ChangeEvent } from "react";
 import Dropzone from "react-dropzone"
 
 interface UpdateProductsModalProps {
@@ -8,6 +9,58 @@ interface UpdateProductsModalProps {
     editData: Product[];
     handleDragDrop: (file: any[], product: Product) => any;
     handleUpdateProducts: () => any;
+}
+
+interface DragDropProps {
+    url?: string;
+    onDragDrop: (url: string) => any;
+}
+
+export const DragDrop = ({ url, onDragDrop }: DragDropProps) => {
+    const [imageUrl, setImageUrl] = useState<string | undefined>(url);
+    const handleDragDrop = async (acceptedFiles: File[]) => {
+        try {
+            const file = acceptedFiles[0];
+            const formData = new FormData();
+            formData.append("file", file);
+    
+            const res = await fetch("/api/products/images", {
+                method: "POST",
+                body: formData,
+            });
+    
+            if (!res.ok) {
+                throw new Error("Failed to upload image");
+            }
+    
+            const { id } = await res.json();
+    
+            // Ensure we use `window.location.origin` to include protocol + hostname + port
+            const _imageUrl = `${window.location.origin}/api/products/images?_id=${id}`;
+    
+            setImageUrl(_imageUrl);
+            onDragDrop(_imageUrl);
+        } catch (err) {
+            console.error("Image upload error:", err);
+        }
+    };
+    return (
+        <Dropzone onDrop={handleDragDrop}>
+            {({ getRootProps, getInputProps }) => (
+                <Box
+                    {...getRootProps()}
+                    p={2}
+                    textAlign="center"
+                    border="1px dashed grey"
+                    my={2}
+                >
+                    <input {...getInputProps()} />
+                    <Typography variant="body2">Drag & Drop Image Here</Typography>
+                    <img src={imageUrl} alt="product" width="100%" />
+                </Box>
+            )}
+        </Dropzone>
+    )
 }
 
 export const UpdateProductsModal = ({ isModalOpen, handleCloseModal, handleDragDrop, handleUpdateProducts, editData }: UpdateProductsModalProps) => {
@@ -72,7 +125,7 @@ export const UpdateProductsModal = ({ isModalOpen, handleCloseModal, handleDragD
                                     my={2}
                                 >
                                     <input {...getInputProps()} />
-                                    <p>Drag & Drop Image Here</p>
+                                    <Typography variant="body2">Drag & Drop Image Here</Typography>
                                     <img src={product.imageUrl} alt="product" width="100%" />
                                 </Box>
                             )}
@@ -83,6 +136,92 @@ export const UpdateProductsModal = ({ isModalOpen, handleCloseModal, handleDragD
                 <Button variant="contained" fullWidth onClick={handleUpdateProducts}>
                     Confirm Update
                 </Button>
+            </Box>
+        </Modal>
+    )
+}
+
+interface AddProductModalProps {
+    isOpen: boolean;
+    handleModalClose: () => any;
+}
+export const AddProductModal = ({ isOpen, handleModalClose }: AddProductModalProps) => {
+    const [product, setProduct] = useState<ProductFields>({});
+
+    const updateProduct = (key: string, value: any) => {
+        const newProduct = JSON.parse(JSON.stringify(product));
+        newProduct[key] = value;
+        console.log(newProduct);
+        setProduct(newProduct);
+    }
+
+    const onTextChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        e.preventDefault();
+        const val = e.target.value;
+        const field = e.target.id;
+        updateProduct(field, val);
+    }
+
+    return (
+        <Modal open={isOpen} onClose={handleModalClose}>
+            <Box
+                p={4}
+                bgcolor="white"
+                mx="auto"
+                my="20vh"
+                width="50vw"
+                maxHeight="60vh"
+                overflow="auto" // Scrollable modal
+            >
+                <Typography variant="h6">Add Product</Typography>
+                <div aria-label="add-product-form" role="form">
+                    <TextField
+                        fullWidth
+                        id="name"
+                        margin="normal"
+                        label="Name"
+                        type="text"
+                        onChange={onTextChange}
+                        value={product.name}
+                        required={true}
+                    />
+                    <TextField
+                        fullWidth
+                        id="description"
+                        margin="normal"
+                        label="Description"
+                        type="text"
+                        onChange={onTextChange}
+                        value={product.description}
+                        required={true}
+                    />
+                    <TextField
+                        fullWidth
+                        id="price"
+                        margin="normal"
+                        label="Price"
+                        type="number"
+                        onChange={onTextChange}
+                        value={product.price}
+                        required={true}
+                    />
+                    <TextField
+                        fullWidth
+                        id="inStock"
+                        margin="normal"
+                        label="In Stock"
+                        type="number"
+                        onChange={onTextChange}
+                        value={product.inStock}
+                        required={true}
+                    />
+                    <DragDrop
+                        onDragDrop={(url: string) => {
+                            updateProduct("imageUrl", url);
+                        }}
+                    />
+                    <Button role="submit" variant="contained" fullWidth onClick={() => { }}>Submit</Button>
+                </div>
             </Box>
         </Modal>
     )

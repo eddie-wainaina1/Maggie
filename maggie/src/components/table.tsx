@@ -5,7 +5,7 @@ import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
 import { Button, Modal, Box, Tooltip} from '@mui/material';
 import { Add, Delete, Edit } from '@mui/icons-material';
 import type { Product } from '@/types/srcTypes';
-import { UpdateProductsModal } from './productModals';
+import { AddProductModal, UpdateProductsModal } from './productModals';
 import { PictureDisplayModal } from './pictureDisplayModal';
 
 interface ProductTableProps {
@@ -16,6 +16,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
   const [products, setProducts] = useState<Product[]>(productsData);
   const [selectedProducts, setSelectedProducts] = useState<GridRowSelectionModel>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
   const [editData, setEditData] = useState<Product[]>([]);
   const [currentImageUrl, setCurrentImageUrl] = useState('');
 
@@ -53,6 +54,9 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
     setEditData([]);
   };
 
+  const handleCloseAddModal = () => {
+    setAddModalOpen(false);
+  }
   const handleCloseImageModal = () => {
     setCurrentImageUrl('');
   };
@@ -75,7 +79,13 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
     <div style={{ height: 400, width: '100%' }}>
       <Box display="flex" justifyContent="space-between" mb={2}>
         <Box>
-          <Button variant="contained" color="secondary" startIcon={<Add />} sx={{ mr: 2 }}>
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<Add />}
+            sx={{ mr: 2 }}
+            onClick={() => setAddModalOpen(true)}
+          >
             Add
           </Button>
           <Button
@@ -103,6 +113,10 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
         columns={columns}
         checkboxSelection
         onRowSelectionModelChange={handleSelectionChange}
+      />
+      <AddProductModal
+        isOpen={addModalOpen}
+        handleModalClose={handleCloseAddModal}
       />
       <UpdateProductsModal
         isModalOpen={isModalOpen}

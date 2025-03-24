@@ -10,8 +10,8 @@ export default function PageLayout (
 ) {
     return (
         <Box sx={{
-            paddingLeft: 10,
-            paddingRight: 10
+            paddingLeft: 0,
+            paddingRight: 2
         }}>
             <header>
                 <Header/>

@@ -9,7 +9,7 @@ export default function Header () {
             sx={{
                 width: "100%",
                 paddingLeft: 2,
-                margin: 10,
+                margin: 8,
             }}
         >
             <AppBar sx={{width: "100%", paddingX: 2}}>

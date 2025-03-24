@@ -18,26 +18,19 @@ export default function ProductCard ({
     currency="KSH"
 }: Readonly<ProductCardProps>) {
     return (
-        <Box
-            sx={{
-                zIndex: 2,
-                borderRadius: 10
-            }}
-        >
             <Paper sx={{
                 display: "flex",
                 flexDirection: "column",
                 gap: 1,
                 padding: 1
             }}>
-                <img src={imageUrl} alt={`Product: ${title}`} height={392}/>
+                <img src={imageUrl} alt={`Product: ${title}`} height={285}/>
                 <Typography variant="h6">{title}</Typography>
                 <Typography variant="body1">{description}</Typography>
                 <Typography variant="body2">{currency} {price}</Typography>
                 <Rating name="rating" value={rating} readOnly/>
                 <Button variant="contained">Add to cart</Button>
             </Paper>
-        </Box>
     );
 }
 ///
