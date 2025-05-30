@@ -34,16 +34,48 @@ export default function RoleButtons({ userId, currentRole }: RoleButtonsProps) {
 
   return (
     <>
-      <Button variant="contained" color="primary" size="small" sx={{ mr: 1 }} onClick={() => handleSetRole("admin")} disabled={isPending}>
-        {isPending && role === "admin" ? <CircularProgress size={20} /> : "Make Admin"}
+      <Button
+        variant="contained"
+        color="primary"
+        size="small"
+        sx={{ mr: 1 }}
+        onClick={() => handleSetRole("admin")}
+        disabled={isPending}
+      >
+        {isPending && role === "admin" ? (
+          <CircularProgress size={20} />
+        ) : (
+          "Make Admin"
+        )}
       </Button>
 
-      <Button variant="contained" color="secondary" size="small" sx={{ mr: 1 }} onClick={() => handleSetRole("moderator")} disabled={isPending}>
-        {isPending && role === "moderator" ? <CircularProgress size={20} /> : "Make Moderator"}
+      <Button
+        variant="contained"
+        color="secondary"
+        size="small"
+        sx={{ mr: 1 }}
+        onClick={() => handleSetRole("moderator")}
+        disabled={isPending}
+      >
+        {isPending && role === "moderator" ? (
+          <CircularProgress size={20} />
+        ) : (
+          "Make Moderator"
+        )}
       </Button>
 
-      <Button variant="outlined" color="error" size="small" onClick={handleRemoveRole} disabled={isPending}>
-        {isPending && role === "None" ? <CircularProgress size={20} /> : "Remove Role"}
+      <Button
+        variant="outlined"
+        color="error"
+        size="small"
+        onClick={handleRemoveRole}
+        disabled={isPending}
+      >
+        {isPending && role === "None" ? (
+          <CircularProgress size={20} />
+        ) : (
+          "Remove Role"
+        )}
       </Button>
     </>
   );

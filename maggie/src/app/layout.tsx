@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import {
   ClerkProvider,
   SignInButton,
   SignedIn,
   SignedOut,
-  UserButton
-} from '@clerk/nextjs';
+  UserButton,
+} from "@clerk/nextjs";
 import "./globals.css";
 import PageLayout from "@/components/pageLayout";
 import theme from "./theme";
@@ -36,17 +36,15 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <ThemeProvider theme={theme}>
-            <PageLayout>
-              {children}
-            </PageLayout>
-          </ThemeProvider>
-        </AppRouterCacheProvider>
-      </body>
-    </html>
+      <html lang="en">
+        <body className={`${geistSans.variable} ${geistMono.variable}`}>
+          <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+            <ThemeProvider theme={theme}>
+              <PageLayout>{children}</PageLayout>
+            </ThemeProvider>
+          </AppRouterCacheProvider>
+        </body>
+      </html>
     </ClerkProvider>
   );
 }

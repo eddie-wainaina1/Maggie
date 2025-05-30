@@ -10,47 +10,50 @@ import { Orders } from "./orders";
 import Users from "./users";
 
 interface TabNavigationProps {
-    searchParams: { panel?: string; search?: string };
-    users: any[]; // Pass users from server
+  searchParams: { panel?: string; search?: string };
+  users: any[]; // Pass users from server
 }
 
-export default function TabNavigation({ searchParams, users }: TabNavigationProps) {
-    const router = useRouter();
-    const pathname = usePathname();
-    const urlSearchParams = useSearchParams();
+export default function TabNavigation({
+  searchParams,
+  users,
+}: TabNavigationProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const urlSearchParams = useSearchParams();
 
-    const activePanel = searchParams.panel || "orders";
+  const activePanel = searchParams.panel || "orders";
 
-    const handleChange = (_: SyntheticEvent, newPanel: string) => {
-        const params = new URLSearchParams(urlSearchParams.toString());
-        params.set("panel", newPanel);
-        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    };
+  const handleChange = (_: SyntheticEvent, newPanel: string) => {
+    const params = new URLSearchParams(urlSearchParams.toString());
+    params.set("panel", newPanel);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
 
-    return (
-        <TabContext value={activePanel}>
-            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                <Tabs component="div" onChange={handleChange} value={activePanel}>
-                    <Tab label="Orders" value="orders" />
-                    <Tab label="Products" value="products" />
-                    <Tab label="Users" value="users" />
-                    <Tab label="Report" value="report" />
-                </Tabs>
-            </Box>
+  return (
+    <TabContext value={activePanel}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+        <Tabs component="div" onChange={handleChange} value={activePanel}>
+          <Tab label="Orders" value="orders" />
+          <Tab label="Products" value="products" />
+          <Tab label="Users" value="users" />
+          <Tab label="Report" value="report" />
+        </Tabs>
+      </Box>
 
-            {/* Tab Panels */}
-            <TabPanel value="orders">
-                <Orders />
-            </TabPanel>
-            <TabPanel value="products">
-                <ProductTable productsData={productsData} />
-            </TabPanel>
-            <TabPanel value="users">
-                <Users searchParams={searchParams} />
-            </TabPanel>
-            <TabPanel value="report">
-                <ProductTable productsData={productsData} />
-            </TabPanel>
-        </TabContext>
-    );
+      {/* Tab Panels */}
+      <TabPanel value="orders">
+        <Orders />
+      </TabPanel>
+      <TabPanel value="products">
+        <ProductTable productsData={productsData} />
+      </TabPanel>
+      <TabPanel value="users">
+        <Users searchParams={searchParams} />
+      </TabPanel>
+      <TabPanel value="report">
+        <ProductTable productsData={productsData} />
+      </TabPanel>
+    </TabContext>
+  );
 }

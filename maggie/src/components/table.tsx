@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import React, { useState } from 'react';
-import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid';
-import { Button, Modal, Box, Tooltip} from '@mui/material';
-import { Add, Delete, Edit } from '@mui/icons-material';
-import type { Product } from '@/types/srcTypes';
-import { AddProductModal, UpdateProductsModal } from './productModals';
-import { PictureDisplayModal } from './pictureDisplayModal';
+import React, { useState } from "react";
+import { DataGrid, GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
+import { Button, Modal, Box, Tooltip } from "@mui/material";
+import { Add, Delete, Edit } from "@mui/icons-material";
+import type { Product } from "@/types/srcTypes";
+import { AddProductModal, UpdateProductsModal } from "./productModals";
+import { PictureDisplayModal } from "./pictureDisplayModal";
 
 interface ProductTableProps {
   productsData: Product[];
@@ -14,26 +14,42 @@ interface ProductTableProps {
 
 export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
   const [products, setProducts] = useState<Product[]>(productsData);
-  const [selectedProducts, setSelectedProducts] = useState<GridRowSelectionModel>([]);
+  const [selectedProducts, setSelectedProducts] =
+    useState<GridRowSelectionModel>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
   const [editData, setEditData] = useState<Product[]>([]);
-  const [currentImageUrl, setCurrentImageUrl] = useState('');
+  const [currentImageUrl, setCurrentImageUrl] = useState("");
 
   const columns: GridColDef[] = [
-    { field: 'productId', headerName: 'Product ID', width: 150 },
-    { field: 'price', headerName: 'Price', width: 100, sortable: true },
-    { field: 'description', headerName: 'Description', width: 200 },
-    { field: 'inStock', headerName: 'In Stock', width: 100, sortable: true },
-    { field: 'pendingOrders', headerName: 'Pending Orders', width: 150, sortable: true },
-    { field: 'fulfilledOrders', headerName: 'Fulfilled Orders', width: 150, sortable: true },
+    { field: "productId", headerName: "Product ID", width: 150 },
+    { field: "price", headerName: "Price", width: 100, sortable: true },
+    { field: "description", headerName: "Description", width: 200 },
+    { field: "inStock", headerName: "In Stock", width: 100, sortable: true },
     {
-      field: 'imageUrl',
-      headerName: 'View Image',
+      field: "pendingOrders",
+      headerName: "Pending Orders",
+      width: 150,
+      sortable: true,
+    },
+    {
+      field: "fulfilledOrders",
+      headerName: "Fulfilled Orders",
+      width: 150,
+      sortable: true,
+    },
+    {
+      field: "imageUrl",
+      headerName: "View Image",
       width: 150,
       renderCell: (params) => (
-        <Tooltip title={<img src={params.value} alt="product" width="100" />} arrow>
-          <Button onClick={() => openImageModal(params.value)}>View Image</Button>
+        <Tooltip
+          title={<img src={params.value} alt="product" width="100" />}
+          arrow
+        >
+          <Button onClick={() => openImageModal(params.value)}>
+            View Image
+          </Button>
         </Tooltip>
       ),
     },
@@ -44,7 +60,9 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
   };
 
   const handleOpenModal = () => {
-    const selectedProductData = products.filter((product) => selectedProducts.includes(product.id));
+    const selectedProductData = products.filter((product) =>
+      selectedProducts.includes(product.id),
+    );
     setEditData(selectedProductData);
     setIsModalOpen(true);
   };
@@ -56,9 +74,9 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
 
   const handleCloseAddModal = () => {
     setAddModalOpen(false);
-  }
+  };
   const handleCloseImageModal = () => {
-    setCurrentImageUrl('');
+    setCurrentImageUrl("");
   };
 
   const openImageModal = (imageUrl: string) => {
@@ -66,8 +84,13 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
   };
 
   const handleDragDrop = (acceptedFiles: File[], rowData: Product) => {
-    const updatedProduct = { ...rowData, imageUrl: URL.createObjectURL(acceptedFiles[0]) };
-    setProducts((prev) => prev.map((prod) => (prod.id === rowData.id ? updatedProduct : prod)));
+    const updatedProduct = {
+      ...rowData,
+      imageUrl: URL.createObjectURL(acceptedFiles[0]),
+    };
+    setProducts((prev) =>
+      prev.map((prod) => (prod.id === rowData.id ? updatedProduct : prod)),
+    );
   };
 
   const handleUpdateProducts = () => {
@@ -76,7 +99,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
   };
 
   return (
-    <div style={{ height: 400, width: '100%' }}>
+    <div style={{ height: 400, width: "100%" }}>
       <Box display="flex" justifyContent="space-between" mb={2}>
         <Box>
           <Button
@@ -132,4 +155,3 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
     </div>
   );
 };
-
