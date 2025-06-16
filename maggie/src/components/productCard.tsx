@@ -1,4 +1,5 @@
 "use client";
+import type { Product } from "@/types/srcTypes";
 import {
   Add,
   AddShoppingCart,
@@ -13,80 +14,129 @@ import {
   Rating,
   Typography,
 } from "@mui/material";
+import { useEffect, useState } from "react";
 
 export interface ProductCardProps {
-  imageUrl: string;
-  title: string;
-  description: string;
-  price: number;
-  currency: string;
-  rating: number;
-  numInCart: number;
+  product: Product;
 }
 
 interface QuantitySelectorProps {
-  quantity: number;
-  setQuantity: (quantity: number) => any;
+  product: Product;
 }
-function QuantitySelector({ quantity, setQuantity }: QuantitySelectorProps) {
-  const handleDecrease = () => setQuantity(Math.max(0, quantity - 1));
-  const handleIncrease = () => setQuantity(quantity + 1);
+function QuantitySelector({ product }: QuantitySelectorProps) {
+  const productId = product.id.toString();
+  const [quantity, setQuantity] = useState<number>(0);
+
+  const handleIncrease = async () => {
+    await fetch(`/api/cart/quantity?productId=${encodeURIComponent(productId)}&action=increase`, {
+      method: "POST",
+      credentials: "same-origin",
+    });
+    await fetchQuantity();
+  }
+
+  const handleDecrease = async () => {
+    await fetch(`/api/cart/quantity?productId=${encodeURIComponent(productId)}&action=reduce`, {
+      method: "POST",
+      credentials: "same-origin",
+    });
+    await fetchQuantity();
+  }
+
+  const fetchQuantity = async () => {
+    const res = await fetch(`/api/cart/quantity?productId=${encodeURIComponent(productId)}`);
+    if (res.ok) {
+      const data = await res.json();
+      setQuantity(data.quantity);
+    } else {
+      setQuantity(0);
+    }
+  };
+
+  const addToCart = async () => {
+    const cartItem = {...product, quantity: 1}
+    try {
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ product: cartItem }),
+      });
+      fetchQuantity();
+      if (!response.ok) throw new Error("Failed to add to cart");
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchQuantity();
+  }, [productId]);
 
   return (
-    <Box
-      display="flex"
-      alignItems="center"
-      gap={1}
-      width="fit-content"
-      sx={{
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: 1,
-        px: 1,
-        py: 0.5,
-      }}
-    >
-      <Button
-        size="small"
-        variant="text"
-        onClick={handleDecrease}
-        color="error"
+    quantity ? (
+      <Box
+        display="flex"
+        alignItems="center"
+        gap={1}
+        width="fit-content"
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 1,
+          px: 1,
+          py: 0.5,
+        }}
       >
-        <AddShoppingCart fontSize="small" />
-        &nbsp;
-        <Remove fontSize="small" />
-      </Button>
+        <Button
+          size="small"
+          variant="text"
+          onClick={handleDecrease}
+          color="error"
+        >
+          <AddShoppingCart fontSize="small" />
+          &nbsp;
+          <Remove fontSize="small" />
+        </Button>
 
-      <Typography mx={1} minWidth={20} textAlign="center">
-        {quantity}
-      </Typography>
+        <Typography mx={1} minWidth={20} textAlign="center">
+          {quantity}
+        </Typography>
 
-      <Button
-        size="small"
-        variant="text"
-        onClick={handleIncrease}
-        color="success"
-      >
-        <Add fontSize="small" />
-        &nbsp;
-        <RemoveShoppingCart fontSize="small" />
+        <Button
+          size="small"
+          variant="text"
+          onClick={handleIncrease}
+          color="success"
+        >
+          <Add fontSize="small" />
+          &nbsp;
+          <RemoveShoppingCart fontSize="small" />
+        </Button>
+      </Box>
+    ) : (
+      <Button variant="contained" onClick={addToCart}>
+        <AddShoppingCart />
+        &nbsp;Add to cart
       </Button>
-    </Box>
+    )
   );
 }
 
 export default function ProductCard({
-  imageUrl,
-  title,
-  description,
-  price,
-  rating,
-  currency = "KSH",
-  numInCart = 1,
+  product
 }: Readonly<ProductCardProps>) {
-  const setCartQuantity = (quantity: number) => {
-    console.log(quantity);
-  };
+  const {
+    imageUrl,
+    name,
+    description,
+    price,
+    rating,
+    currency = "KSH",
+  } = product;
+
   return (
     <Paper
       sx={{
@@ -96,21 +146,14 @@ export default function ProductCard({
         padding: 1,
       }}
     >
-      <img src={imageUrl} alt={`Product: ${title}`} height={285} />
-      <Typography variant="h6">{title}</Typography>
+      <img src={imageUrl} alt={`Product: ${name}`} height={285} />
+      <Typography variant="h6">{name}</Typography>
       <Typography variant="body1">{description}</Typography>
       <Typography variant="body2">
         {currency} {price}
       </Typography>
-      <Rating name="rating" value={rating} readOnly />
-      {numInCart > 0 ? (
-        <QuantitySelector quantity={numInCart} setQuantity={setCartQuantity} />
-      ) : (
-        <Button variant="contained">
-          <AddShoppingCart />
-          &nbsp;Add to cart
-        </Button>
-      )}
+      <Rating name="rating" value={rating} defaultValue={0} readOnly />
+      <QuantitySelector product={product} />
     </Paper>
   );
 }

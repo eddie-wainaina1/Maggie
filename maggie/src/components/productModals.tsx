@@ -1,4 +1,4 @@
-import type { Product, ProductFields } from "@/types/srcTypes";
+import type { ProductAdmin, ProductFields } from "@/types/srcTypes";
 import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 import { useState, type ChangeEvent } from "react";
 import Dropzone from "react-dropzone";
@@ -6,8 +6,8 @@ import Dropzone from "react-dropzone";
 interface UpdateProductsModalProps {
   isModalOpen: boolean;
   handleCloseModal: () => any;
-  editData: Product[];
-  handleDragDrop: (file: any[], product: Product) => any;
+  editData: ProductAdmin[];
+  handleDragDrop: (file: any[], product: ProductAdmin) => any;
   handleUpdateProducts: () => any;
 }
 
@@ -83,7 +83,7 @@ export const UpdateProductsModal = ({
       >
         <Typography variant="h6">Update Product(s)</Typography>
         {editData.map((product) => (
-          <div key={product.id}>
+          <div key={product.id.toString()}>
             <TextField
               fullWidth
               margin="normal"
@@ -164,7 +164,6 @@ export const AddProductModal = ({
   const updateProduct = (key: string, value: any) => {
     const newProduct = JSON.parse(JSON.stringify(product));
     newProduct[key] = value;
-    console.log(newProduct);
     setProduct(newProduct);
   };
 

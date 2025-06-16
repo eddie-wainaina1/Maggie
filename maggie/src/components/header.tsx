@@ -1,5 +1,7 @@
+"use client"
+
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-import { AppBar, Box, Button, Grid2, Paper, Typography } from "@mui/material";
+import { AppBar, Box, Button, Grid, Paper, Typography } from "@mui/material";
 import CartComponent from "./cart";
 import SearchBar from "./search";
 
@@ -13,17 +15,17 @@ export default function Header() {
       }}
     >
       <AppBar sx={{ width: "100%", paddingX: 2 }}>
-        <Grid2
+        <Grid
           container
           direction={"row"}
           sx={{ justifyContent: "space-between", alignItems: "center" }}
         >
-          <Grid2>
+          <Grid>
             <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}>
               MAGGIE&apos;S DESIGNS
             </Typography>
-          </Grid2>
-          <Grid2>
+          </Grid>
+          <Grid>
             <Box display="flex" alignItems="center" gap={2}>
               <SearchBar />
               <CartComponent expanded={false} />
@@ -38,8 +40,8 @@ export default function Header() {
                 <UserButton />
               </SignedIn>
             </Box>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       </AppBar>
     </Paper>
   );

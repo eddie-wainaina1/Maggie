@@ -1,31 +1,39 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Cookies from 'js-cookie';
 import {
   Badge,
   Button,
+  IconButton,
   List,
   ListItem,
   ListItemText,
   Typography,
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-
-// Define the structure of a product
-export interface Product {
-  productId: string;
-  description: string;
-  price: number;
-}
+import { getFingerprint } from "@/cache/utils";
+import type { Product } from "@/types/srcTypes";
 
 export interface CartProps {
   expanded: boolean;
 }
 
-export type Cart = Product[];
+export interface CartItem extends Product {
+  quantity: number;
+}
+
+export type Cart = CartItem[];
 
 export const CartComponent = ({ expanded }: CartProps) => {
   const [cart, setCart] = useState<Cart>([]);
+
+  const setDeviceCookie = async () => {
+    if (!Cookies.get("deviceId")) {
+      const fp = await getFingerprint();
+      Cookies.set('deviceId', fp, { expires: 7, path: '/' }); // 7-day expiry
+    }
+  }
 
   useEffect(() => {
     fetchCart();
@@ -33,8 +41,12 @@ export const CartComponent = ({ expanded }: CartProps) => {
 
   // Fetch the cart items from the API
   const fetchCart = async () => {
+    await setDeviceCookie();
     try {
-      const response = await fetch("/api/cart/get");
+      const response = await fetch("/api/cart", {
+        "method": "GET",
+        "credentials": "same-origin",
+      });
       const data = await response.json();
       setCart(data.cart);
     } catch (error) {
@@ -43,10 +55,12 @@ export const CartComponent = ({ expanded }: CartProps) => {
   };
 
   // Add a product to the cart
-  const addToCart = async (product: Product) => {
+  const updateCart = async (product: Product) => {
+    await setDeviceCookie();
     try {
-      const response = await fetch("/api/cart/add", {
+      const response = await fetch("/api/cart", {
         method: "POST",
+        credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
         },
@@ -57,24 +71,6 @@ export const CartComponent = ({ expanded }: CartProps) => {
       await fetchCart(); // Refresh the cart after adding
     } catch (error) {
       console.error("Failed to add to cart:", error);
-    }
-  };
-
-  // Remove a product from the cart
-  const removeFromCart = async (productId: string) => {
-    try {
-      const response = await fetch("/api/cart/remove", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ productId }),
-      });
-
-      if (!response.ok) throw new Error("Failed to remove from cart");
-      await fetchCart(); // Refresh the cart after removal
-    } catch (error) {
-      console.error("Failed to remove from cart:", error);
     }
   };
 
@@ -91,7 +87,7 @@ export const CartComponent = ({ expanded }: CartProps) => {
                   <Button
                     variant="contained"
                     color="secondary"
-                    onClick={() => removeFromCart(item.productId)}
+                    onClick={() => updateCart(item)}
                   >
                     Remove
                   </Button>
@@ -105,9 +101,11 @@ export const CartComponent = ({ expanded }: CartProps) => {
           </List>
         </>
       ) : (
-        <Badge badgeContent={0} color="secondary" showZero>
-          <ShoppingCartIcon />
-        </Badge>
+        <IconButton color="inherit">
+          <Badge badgeContent={0} color="secondary" showZero>
+            <ShoppingCartIcon />
+          </Badge>
+        </IconButton>
       )}
     </div>
   );

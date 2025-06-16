@@ -17,7 +17,6 @@ export async function GET(req: NextApiRequest) {
   // Fetch users from Clerk
   const client = await clerkClient();
   const users = await client.users.getUserList(options);
-  console.log(users);
 
   return NextResponse.json(users.data);
 }

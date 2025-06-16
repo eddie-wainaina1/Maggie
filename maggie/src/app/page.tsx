@@ -1,6 +1,7 @@
 // import Image from "next/image";
 import Marketplace from "@/components/marketplace";
 import styles from "./page.module.css";
+import productsData from "@/miscl/productsSample";
 
 const productSample = {
   imageUrl:
@@ -11,8 +12,9 @@ const productSample = {
   currency: "KES",
   rating: 3,
 };
+
 export default function Home() {
-  const products = Array.from({ length: 50 }, () => ({ ...productSample }));
+  const products = productsData;
   return (
     <div className={styles.page}>
       <Marketplace products={products} />

@@ -4,21 +4,21 @@ import React, { useState } from "react";
 import { DataGrid, GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { Button, Modal, Box, Tooltip } from "@mui/material";
 import { Add, Delete, Edit } from "@mui/icons-material";
-import type { Product } from "@/types/srcTypes";
+import type { ProductAdmin } from "@/types/srcTypes";
 import { AddProductModal, UpdateProductsModal } from "./productModals";
 import { PictureDisplayModal } from "./pictureDisplayModal";
 
 interface ProductTableProps {
-  productsData: Product[];
+  productsData: ProductAdmin[];
 }
 
 export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
-  const [products, setProducts] = useState<Product[]>(productsData);
+  const [products, setProducts] = useState<ProductAdmin[]>(productsData);
   const [selectedProducts, setSelectedProducts] =
     useState<GridRowSelectionModel>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
-  const [editData, setEditData] = useState<Product[]>([]);
+  const [editData, setEditData] = useState<ProductAdmin[]>([]);
   const [currentImageUrl, setCurrentImageUrl] = useState("");
 
   const columns: GridColDef[] = [
@@ -83,7 +83,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
     setCurrentImageUrl(imageUrl);
   };
 
-  const handleDragDrop = (acceptedFiles: File[], rowData: Product) => {
+  const handleDragDrop = (acceptedFiles: File[], rowData: ProductAdmin) => {
     const updatedProduct = {
       ...rowData,
       imageUrl: URL.createObjectURL(acceptedFiles[0]),
