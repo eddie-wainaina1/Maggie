@@ -44,8 +44,12 @@ export const CartComponent = ({ expanded }: CartProps) => {
   };
 
   useEffect(() => {
-    // initial server sync
-    fetchCart();
+    // initial server sync: hydrate local store from Redis via API
+    (async () => {
+      await cartStore.init();
+      // also fetch server cart in case of mismatch
+      await fetchCart();
+    })();
     // subscribe to the local cart store for live updates
     const unsubscribe = cartStore.subscribe((items) => {
       setCart(items as Cart);

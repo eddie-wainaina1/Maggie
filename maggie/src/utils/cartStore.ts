@@ -14,14 +14,14 @@ const listeners: Listener[] = [];
 function notify() {
   const snapshot = cart.map((c) => ({ ...c }));
   listeners.forEach((l) => {
-          try {
-            l(snapshot);
-          } catch (err) {
-            // log listener errors for visibility
-            try {
-              // eslint-disable-next-line no-console
-              console.error("cartStore listener error:", err);
-            } catch {}
+    try {
+      l(snapshot);
+    } catch (err) {
+      // log listener errors for visibility
+      try {
+        // eslint-disable-next-line no-console
+        console.error("cartStore listener error:", err);
+      } catch {}
     }
   });
 }
@@ -34,11 +34,11 @@ function loadFromStorage() {
       cart = JSON.parse(raw) as CartItem[];
     }
   } catch (_err) {
-      try {
-        // eslint-disable-next-line no-console
-        console.error("cartStore load error:", _err);
-      } catch {}
-      cart = [];
+    try {
+      // eslint-disable-next-line no-console
+      console.error("cartStore load error:", _err);
+    } catch {}
+    cart = [];
   }
 }
 
@@ -47,14 +47,52 @@ function saveToStorage() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
   } catch (_err) {
-      try {
-        // eslint-disable-next-line no-console
-        console.error("cartStore save error:", _err);
-      } catch {}
+    try {
+      // eslint-disable-next-line no-console
+      console.error("cartStore save error:", _err);
+    } catch {}
   }
 }
 
 export const cartStore = {
+  // initialize store from server (Redis) if available
+  async init() {
+    if (typeof window === "undefined") return;
+    try {
+      const res = await fetch("/api/cart", { method: "GET", credentials: "same-origin" });
+      if (res.ok) {
+        const json = await res.json();
+        const serverCart = (json.cart || {}) as Record<string, unknown>;
+        // serverCart is keyed by productId -> product
+        const items: CartItem[] = Object.values(serverCart).map((p) => {
+          const prod = p as Record<string, unknown>;
+          const item: CartItem = {
+            id: (prod.id ?? prod.productId ?? "") as unknown as string,
+            productId: (prod.productId ?? String(prod.id ?? "")) as string,
+            name: (prod.name ?? "") as string,
+            price: Number(prod.price ?? 0),
+            rating: (prod.rating ?? null) as number | null,
+            description: (prod.description ?? "") as string,
+            inStock: Number(prod.inStock ?? 0),
+            imageUrl: (prod.imageUrl ?? "") as string,
+            currency: (prod.currency ?? undefined) as string | undefined,
+            quantity: Number(prod.quantity ?? 0),
+          };
+          return item;
+        });
+        if (items.length > 0) {
+          cart = items;
+          saveToStorage();
+          notify();
+        }
+      }
+    } catch (err) {
+      try {
+        // eslint-disable-next-line no-console
+        console.error("cartStore init error:", err);
+      } catch {}
+    }
+  },
   getCart(): CartItem[] {
     return cart.map((c) => ({ ...c }));
   },
