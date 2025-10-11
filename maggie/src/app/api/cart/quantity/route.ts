@@ -53,7 +53,13 @@ export async function POST(req: NextRequest) {
   if (product.quantity <= 0) {
     delete cart[productId]
   }
-  await redis.set(deviceId, JSON.stringify(cart));
+  const serialized = JSON.stringify(cart);
+  const MAX_CART_BYTES = 150 * 1024; // 150KB
+  if (serialized.length > MAX_CART_BYTES) {
+    return NextResponse.json({ message: "Cart too large" }, { status: 413 });
+  }
+
+  await redis.set(deviceId, serialized, "EX", 60 * 60 * 24 * 30);
 
   return NextResponse.json({ quantity: product.quantity }, { status: 200 });
 }

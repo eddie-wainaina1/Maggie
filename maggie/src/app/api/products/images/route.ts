@@ -1,9 +1,8 @@
 import { fetchFile, uploadFile } from "@/db/cloudStorage";
-import type { NextApiRequest } from "next";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
-export async function GET(req: NextApiRequest) {
-  const url = new URL(req.url as string);
+export async function GET(req: NextRequest) {
+  const url = new URL(req.url);
   const _id = url.searchParams.get("_id");
   if (!_id) {
     return NextResponse.json({ error: "_id query required" }, { status: 400 });
@@ -21,7 +20,10 @@ export async function GET(req: NextApiRequest) {
     });
 
     return new NextResponse(responseStream, {
-      headers: { "Content-Type": "application/octet-stream" }, // Generic type, can be updated dynamically
+      headers: {
+        "Content-Type": "application/octet-stream",
+        "Cache-Control": "public, max-age=31536000, immutable",
+      },
     });
   } catch (err) {
     return NextResponse.json(
@@ -34,12 +36,19 @@ export async function GET(req: NextApiRequest) {
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("file") as File | null;
     if (!file) {
-      return NextResponse.json(
-        { error: "No files received." },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "No files received." }, { status: 400 });
+    }
+
+    // Validate file type and size (public endpoint but must guard abuse)
+    const MAX_BYTES = 5 * 1024 * 1024; // 5MB
+    const allowed = ["image/png", "image/jpeg", "image/webp"];
+    if (!allowed.includes(file.type)) {
+      return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
+    }
+    if (file.size > MAX_BYTES) {
+      return NextResponse.json({ error: "File too large" }, { status: 413 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
