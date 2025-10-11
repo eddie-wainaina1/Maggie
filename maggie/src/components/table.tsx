@@ -150,6 +150,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
       <DataGrid
         rows={products}
         columns={columns}
+        getRowId={(row: any) => row.id ?? row._id ?? row.productId}
         checkboxSelection
         onRowSelectionModelChange={handleSelectionChange}
       />
