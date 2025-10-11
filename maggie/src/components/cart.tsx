@@ -27,7 +27,8 @@ export interface CartItem extends Product {
 export type Cart = CartItem[];
 
 export const CartComponent = ({ expanded }: CartProps) => {
-  const [cart, setCart] = useState<Cart>(() => cartStore.getCart());
+  // start with empty array so server-render and initial client render match
+  const [cart, setCart] = useState<Cart>([]);
 
   const setDeviceCookie = async () => {
     if (!Cookies.get("deviceId")) {
