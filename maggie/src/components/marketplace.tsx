@@ -1,13 +1,27 @@
+"use client";
 import styles from "@/app/page.module.css";
 import { Box, Divider, Grid, Typography } from "@mui/material";
-import ProductCard, { ProductCardProps } from "./productCard";
+import ProductCard from "./productCard";
 import type { Product } from "@/types/srcTypes";
+import { useEffect, useState } from "react";
 
-interface ProductsList {
-  products: Product[];
-}
+export default function Marketplace() {
+  const [products, setProducts] = useState<Product[]>([]);
 
-export default function Marketplace({ products }: Readonly<ProductsList>) {
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("/api/products");
+        if (!res.ok) return;
+        const json = await res.json();
+        setProducts(json.data || []);
+      } catch (err) {
+        console.error("Failed to load products", err);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   return (
     <Box
       sx={{
@@ -16,13 +30,11 @@ export default function Marketplace({ products }: Readonly<ProductsList>) {
         border: "none",
       }}
     >
-      <Typography variant="h4">
-        Marketplace
-      </Typography>
+      <Typography variant="h4">Marketplace</Typography>
 
       <Grid container spacing={3}>
         {products.map((product, index) => (
-          <Grid key={`product-${index + 1}`}>
+          <Grid item xs={12} sm={6} md={4} key={product.productId ?? product.id ?? index}>
             <ProductCard product={product} />
           </Grid>
         ))}
