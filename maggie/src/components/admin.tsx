@@ -8,7 +8,7 @@ import { Orders } from "./orders";
 import Users from "./users";
 
 export default function Admin(params: {
-  searchParams: Promise<{ search?: string }>;
+  searchParams?: { search?: string };
 }) {
   const [activePanel, setActivePanel] = useState<string>("orders");
 
@@ -16,6 +16,7 @@ export default function Admin(params: {
     event: SyntheticEvent<Element, Event>,
     newPanel: string,
   ) => {
+    event.preventDefault();
     setActivePanel(newPanel);
   };
 

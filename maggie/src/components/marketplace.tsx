@@ -16,7 +16,7 @@ export default function Marketplace({ products }: Readonly<ProductsList>) {
         border: "none",
       }}
     >
-      <Typography variant="h4" sx={{ paddingY: 2 }}>
+      <Typography variant="h4">
         Marketplace
       </Typography>
 
