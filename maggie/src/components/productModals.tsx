@@ -36,10 +36,20 @@ export const DragDrop = ({ url, onDragDrop }: DragDropProps) => {
       const { id } = await res.json();
 
       // Ensure we use `window.location.origin` to include protocol + hostname + port
-      const _imageUrl = `${window.location.origin}/api/products/images?_id=${id}`;
+      // Request a short-lived signed token for the image, then fetch the raw bytes
+      const signRes = await fetch(`/api/products/images/sign?_id=${id}`);
+      if (!signRes.ok) throw new Error("Failed to request signed token");
+      const { token } = await signRes.json();
+      const signedUrl = `${window.location.origin}/api/products/images?_id=${id}&token=${encodeURIComponent(token)}`;
 
-      setImageUrl(_imageUrl);
-      onDragDrop(_imageUrl);
+      // Fetch raw bytes and create an object URL preview (so img src is not the signed URL itself)
+      const previewRes = await fetch(signedUrl);
+      if (!previewRes.ok) throw new Error("Failed to fetch signed image");
+      const blob = await previewRes.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      setImageUrl(objectUrl);
+      onDragDrop(id); // store the GridFS id as canonical source (don't persist the signed URL)
+
     } catch (err) {
       console.error("Image upload error:", err);
     }

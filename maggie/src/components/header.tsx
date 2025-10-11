@@ -1,9 +1,28 @@
 "use client"
 
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import React from "react";
+import { SignedIn, SignedOut, useClerk, UserButton } from "@clerk/nextjs";
 import { AppBar, Box, Button, Grid, Paper, Typography } from "@mui/material";
 import CartComponent from "./cart";
 import SearchBar from "./search";
+
+const SignInButton_ = () => {
+  const clerk = useClerk();
+
+  const handleClick = async () => {
+    try {
+      // useClerk's returned object typing is complex; call openSignIn if available
+      const maybe = clerk as unknown as { openSignIn?: (opts?: Record<string, unknown>) => void };
+      maybe.openSignIn?.({});
+    } catch (err) {
+      // log error for visibility
+      // eslint-disable-next-line no-console
+      console.error("Failed to open sign-in modal", err);
+    }
+  };
+
+  return React.createElement(Button, { variant: "text", color: "secondary", onClick: handleClick }, "Sign In");
+};
 
 export default function Header() {
   return (
@@ -30,11 +49,8 @@ export default function Header() {
               <SearchBar />
               <CartComponent expanded={false} />
               <SignedOut>
-                <SignInButton mode="modal">
-                  <Button variant="text" color="secondary">
-                    Sign In
-                  </Button>
-                </SignInButton>
+                {/* Use a direct clerk call instead of the SignInButton component to avoid client/server boundary issues */}
+                <SignInButton_ />
               </SignedOut>
               <SignedIn>
                 <UserButton />

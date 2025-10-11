@@ -1,5 +1,6 @@
-import { fetchFile, uploadFile } from "@/db/cloudStorage";
+import { fetchFile, uploadFile, getFileMetadata } from "@/db/cloudStorage";
 import { NextResponse, type NextRequest } from "next/server";
+import crypto from "crypto";
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -7,9 +8,60 @@ export async function GET(req: NextRequest) {
   if (!_id) {
     return NextResponse.json({ error: "_id query required" }, { status: 400 });
   }
-
   try {
-    const stream = fetchFile(_id);
+    // Validate a signed token to prevent public/unrestricted downloads.
+    const token = url.searchParams.get("token");
+    if (!token) {
+      return NextResponse.json({ error: "Missing token" }, { status: 401 });
+    }
+
+    const signingKey = process.env.IMAGE_SIGNING_KEY;
+    if (!signingKey) {
+      return NextResponse.json(
+        { error: "Server misconfigured: IMAGE_SIGNING_KEY" },
+        { status: 500 },
+      );
+    }
+
+    // Token format: base64url(data). data = id:expiry:hmacHex
+    const buf = Buffer.from(token, "base64url");
+    const data = buf.toString("utf8");
+    const parts = data.split(":");
+    if (parts.length < 3) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
+    const [tid, expiryStr, hmacHex] = parts;
+    const expiry = Number(expiryStr);
+    if (tid !== _id) {
+      return NextResponse.json(
+        { error: "Token does not match id" },
+        { status: 401 },
+      );
+    }
+    if (Number.isNaN(expiry) || Date.now() > expiry) {
+      return NextResponse.json({ error: "Token expired" }, { status: 401 });
+    }
+
+    const hmac = crypto
+      .createHmac("sha256", signingKey)
+      .update(`${tid}:${expiry}`)
+      .digest("hex");
+    if (
+      !crypto.timingSafeEqual(
+        Buffer.from(hmacHex, "hex"),
+        Buffer.from(hmac, "hex"),
+      )
+    ) {
+      return NextResponse.json(
+        { error: "Invalid token signature" },
+        { status: 401 },
+      );
+    }
+
+    // Token valid. Stream the (possibly decrypted) bytes from GridFS to the client
+    const stream = await fetchFile(_id);
+    const meta = await getFileMetadata(_id);
+    const contentType = meta?.metadata?.type ?? "application/octet-stream";
 
     const responseStream = new ReadableStream({
       start(controller) {
@@ -21,13 +73,15 @@ export async function GET(req: NextRequest) {
 
     return new NextResponse(responseStream, {
       headers: {
-        "Content-Type": "application/octet-stream",
-        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": contentType,
+        "Content-Disposition": `inline; filename="${meta?.filename ?? _id}"`,
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        "X-Signed": "true",
       },
     });
   } catch (err) {
     return NextResponse.json(
-      { error: "Error fetching image", details: err },
+      { error: "Error fetching image", details: String(err) },
       { status: 500 },
     );
   }
