@@ -154,10 +154,12 @@ export const UpdateProductsModal = ({
 interface AddProductModalProps {
   isOpen: boolean;
   handleModalClose: () => any;
+  onCreated?: () => any;
 }
 export const AddProductModal = ({
   isOpen,
   handleModalClose,
+  onCreated,
 }: AddProductModalProps) => {
   const [product, setProduct] = useState<ProductFields>({});
 
@@ -245,7 +247,21 @@ export const AddProductModal = ({
             role="submit"
             variant="contained"
             fullWidth
-            onClick={() => {}}
+            onClick={async () => {
+              try {
+                // Submit to products API
+                const res = await fetch("/api/products", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(product),
+                });
+                if (!res.ok) throw new Error("Failed to create product");
+                if (onCreated) onCreated();
+                handleModalClose();
+              } catch (err) {
+                console.error("Failed to create product", err);
+              }
+            }}
           >
             Submit
           </Button>

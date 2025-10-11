@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { DataGrid, GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Button, Modal, Box, Tooltip } from "@mui/material";
 import { Add, Delete, Edit } from "@mui/icons-material";
 import type { ProductAdmin } from "@/types/srcTypes";
@@ -14,8 +14,7 @@ interface ProductTableProps {
 
 export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
   const [products, setProducts] = useState<ProductAdmin[]>(productsData);
-  const [selectedProducts, setSelectedProducts] =
-    useState<GridRowSelectionModel>([]);
+  const [selectedProducts, setSelectedProducts] = useState<(string | number)[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState<boolean>(false);
   const [editData, setEditData] = useState<ProductAdmin[]>([]);
@@ -55,13 +54,14 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
     },
   ];
 
-  const handleSelectionChange = (newSelection: GridRowSelectionModel) => {
-    setSelectedProducts(newSelection);
+  const handleSelectionChange = (newSelection: any) => {
+    // DataGrid may pass a selection model; coerce to an array of ids
+    setSelectedProducts(Array.isArray(newSelection) ? newSelection : []);
   };
 
   const handleOpenModal = () => {
     const selectedProductData = products.filter((product) =>
-      selectedProducts.includes(product.id),
+      selectedProducts.includes(product.id as any),
     );
     setEditData(selectedProductData);
     setIsModalOpen(true);
@@ -78,6 +78,11 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
   const handleCloseImageModal = () => {
     setCurrentImageUrl("");
   };
+
+  // Load latest products on mount
+  React.useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const openImageModal = (imageUrl: string) => {
     setCurrentImageUrl(imageUrl);
@@ -96,6 +101,17 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
   const handleUpdateProducts = () => {
     // Bulk update logic (left empty for now)
     handleCloseModal();
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch("/api/products");
+      if (!res.ok) return;
+      const json = await res.json();
+      setProducts(json.data || []);
+    } catch (err) {
+      console.error("Failed to fetch products", err);
+    }
   };
 
   return (
@@ -140,6 +156,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
       <AddProductModal
         isOpen={addModalOpen}
         handleModalClose={handleCloseAddModal}
+        onCreated={fetchProducts}
       />
       <UpdateProductsModal
         isModalOpen={isModalOpen}
