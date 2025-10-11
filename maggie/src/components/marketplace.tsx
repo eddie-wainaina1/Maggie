@@ -1,6 +1,6 @@
 "use client";
 // import styles from "@/app/page.module.css";
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, Divider, Grid, Typography } from "@mui/material";
 import ProductCard from "./productCard";
 import type { Product } from "@/types/srcTypes";
 import { useEffect, useState } from "react";
@@ -31,7 +31,7 @@ export default function Marketplace() {
       }}
     >
       <Typography variant="h4">Marketplace</Typography>
-
+      <Divider sx={{ my: 2 }} />
       <Grid container spacing={3}>
         {products.map((product, index) => (
           <Grid
