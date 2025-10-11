@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Button, Modal, Box, Tooltip } from "@mui/material";
+import { Button, Box, Tooltip } from "@mui/material";
 import { Add, Delete, Edit } from "@mui/icons-material";
 import type { ProductAdmin } from "@/types/srcTypes";
 import { AddProductModal, UpdateProductsModal } from "./productModals";
@@ -43,7 +43,7 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
       width: 150,
       renderCell: (params) => (
         <Tooltip
-          title={<img src={params.value} alt="product" width="100" />}
+          title={<img src={params.value} alt="product" width="100" /> /* eslint-disable-line @next/next/no-img-element */}
           arrow
         >
           <Button onClick={() => openImageModal(params.value)}>
@@ -54,14 +54,14 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
     },
   ];
 
-  const handleSelectionChange = (newSelection: any) => {
+  const handleSelectionChange = (newSelection: unknown) => {
     // DataGrid may pass a selection model; coerce to an array of ids
-    setSelectedProducts(Array.isArray(newSelection) ? newSelection : []);
+    setSelectedProducts(Array.isArray(newSelection) ? (newSelection as Array<string | number>) : []);
   };
 
   const handleOpenModal = () => {
     const selectedProductData = products.filter((product) =>
-      selectedProducts.includes(product.id as any),
+      selectedProducts.includes(product.id as string | number),
     );
     setEditData(selectedProductData);
     setIsModalOpen(true);
@@ -148,9 +148,9 @@ export const ProductTable: React.FC<ProductTableProps> = ({ productsData }) => {
       </Box>
 
       <DataGrid
-        rows={products}
+        rows={products as unknown as Record<string, unknown>[]}
         columns={columns}
-        getRowId={(row: any) => row.id ?? row._id ?? row.productId}
+        getRowId={(row: Record<string, unknown>) => (row.id as string | number) ?? (row._id as string | number) ?? (row.productId as string | number)}
         checkboxSelection
         onRowSelectionModelChange={handleSelectionChange}
       />

@@ -9,7 +9,6 @@ import {
 import {
   Box,
   Button,
-  IconButton,
   Paper,
   Rating,
   Typography,
@@ -73,7 +72,7 @@ function QuantitySelector({ product }: QuantitySelectorProps) {
 
   useEffect(() => {
     fetchQuantity();
-  }, [productId]);
+  }, [productId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     quantity ? (
@@ -146,6 +145,7 @@ export default function ProductCard({
         padding: 1,
       }}
     >
+      { /* eslint-disable-next-line @next/next/no-img-element */ }
       <img src={imageUrl} alt={`Product: ${name}`} height={285} />
       <Typography variant="h6">{name}</Typography>
       <Typography variant="body1">{description}</Typography>

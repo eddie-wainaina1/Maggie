@@ -1,6 +1,6 @@
 "use client";
-import styles from "@/app/page.module.css";
-import { Box, Divider, Grid, Typography } from "@mui/material";
+// import styles from "@/app/page.module.css";
+import { Box, Grid, Typography } from "@mui/material";
 import ProductCard from "./productCard";
 import type { Product } from "@/types/srcTypes";
 import { useEffect, useState } from "react";
@@ -34,7 +34,10 @@ export default function Marketplace() {
 
       <Grid container spacing={3}>
         {products.map((product, index) => (
-          <Grid item xs={12} sm={6} md={4} key={product.productId ?? product.id ?? index}>
+          <Grid
+            size={{ xs: 12, sm: 6, md: 4 }}
+            key={product.productId ?? product.id ?? index}
+          >
             <ProductCard product={product} />
           </Grid>
         ))}

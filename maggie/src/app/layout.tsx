@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
-import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
+// import "./globals.css";
 import PageLayout from "@/components/pageLayout";
 import theme from "./theme";
 import { ThemeProvider } from "@mui/material/styles";

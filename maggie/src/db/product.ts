@@ -2,7 +2,7 @@ import { Product, connect } from "@/db/schema";
 import type { ProductFields } from "@/types/srcTypes";
 import { ObjectId } from "mongodb";
 
-let connectionPromise: Promise<any> | null = null;
+let connectionPromise: Promise<unknown> | null = null;
 const ensureConnected = async () => {
   if (!connectionPromise) connectionPromise = connect();
   return connectionPromise;
@@ -14,7 +14,7 @@ export const addProduct = async (productData: ProductFields) => {
   return await product.save();
 };
 
-export const deleteProduct = async (id: String | ObjectId) => {
+export const deleteProduct = async (id: string | ObjectId) => {
   await ensureConnected();
   let _id = id;
   if (typeof id === "string") {
@@ -24,7 +24,7 @@ export const deleteProduct = async (id: String | ObjectId) => {
 };
 
 export const updateProduct = async (
-  id: String | ObjectId,
+  id: string | ObjectId,
   productData: ProductFields,
 ) => {
   await ensureConnected();
@@ -32,7 +32,8 @@ export const updateProduct = async (
   if (typeof id === "string") {
     _id = new ObjectId(id);
   }
-  const product = Product.findByIdAndUpdate(id, productData);
+  const product = Product.findByIdAndUpdate(_id, productData);
+  return product;
 };
 
 export const updateMultipleProducts = async (

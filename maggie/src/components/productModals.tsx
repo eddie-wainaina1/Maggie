@@ -5,15 +5,15 @@ import Dropzone from "react-dropzone";
 
 interface UpdateProductsModalProps {
   isModalOpen: boolean;
-  handleCloseModal: () => any;
+  handleCloseModal: () => void;
   editData: ProductAdmin[];
-  handleDragDrop: (file: any[], product: ProductAdmin) => any;
-  handleUpdateProducts: () => any;
+  handleDragDrop: (file: File[], product: ProductAdmin) => void;
+  handleUpdateProducts: () => void;
 }
 
 interface DragDropProps {
   url?: string;
-  onDragDrop: (url: string) => any;
+  onDragDrop: (url: string) => void;
 }
 
 export const DragDrop = ({ url, onDragDrop }: DragDropProps) => {
@@ -56,7 +56,7 @@ export const DragDrop = ({ url, onDragDrop }: DragDropProps) => {
         >
           <input {...getInputProps()} />
           <Typography variant="body2">Drag & Drop Image Here</Typography>
-          <img src={imageUrl} alt="product" width="100%" />
+          <img src={imageUrl} alt="product" width="100%" /> {/* eslint-disable-line @next/next/no-img-element */}
         </Box>
       )}
     </Dropzone>
@@ -136,7 +136,7 @@ export const UpdateProductsModal = ({
                   <Typography variant="body2">
                     Drag & Drop Image Here
                   </Typography>
-                  <img src={product.imageUrl} alt="product" width="100%" />
+                  <img src={product.imageUrl} alt="product" width="100%" /> {/* eslint-disable-line @next/next/no-img-element */}
                 </Box>
               )}
             </Dropzone>
@@ -153,8 +153,8 @@ export const UpdateProductsModal = ({
 
 interface AddProductModalProps {
   isOpen: boolean;
-  handleModalClose: () => any;
-  onCreated?: () => any;
+  handleModalClose: () => void;
+  onCreated?: () => void;
 }
 export const AddProductModal = ({
   isOpen,
@@ -163,7 +163,7 @@ export const AddProductModal = ({
 }: AddProductModalProps) => {
   const [product, setProduct] = useState<ProductFields>({});
 
-  const updateProduct = (key: string, value: any) => {
+  const updateProduct = (key: string, value: unknown) => {
     const newProduct = JSON.parse(JSON.stringify(product));
     newProduct[key] = value;
     setProduct(newProduct);

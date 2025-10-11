@@ -11,12 +11,11 @@ import Users from "./users";
 
 interface TabNavigationProps {
   searchParams: { panel?: string; search?: string };
-  users: any[]; // Pass users from server
+  users: Array<Record<string, unknown>>; // Pass users from server
 }
 
 export default function TabNavigation({
-  searchParams,
-  users,
+  searchParams
 }: TabNavigationProps) {
   const router = useRouter();
   const pathname = usePathname();

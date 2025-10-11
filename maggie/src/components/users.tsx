@@ -1,11 +1,8 @@
 "use client";
-import { redirect } from "next/navigation";
-import { checkRole } from "@/utils/roles";
 import { SearchUsers } from "@/components/searchUsers";
-import { Box, Button, Card, CardContent, Typography } from "@mui/material";
+import { Box, Card, CardContent, Typography } from "@mui/material";
 import RoleButtons from "./RoleButtons";
 import { useEffect, useState } from "react";
-// import type { User } from '@clerk/nextjs/server';
 
 type EmailAddress = { id: string; emailAddress: string };
 interface User {
@@ -27,7 +24,6 @@ export default function Users({ searchParams }: UsersProps) {
   const fetchUsers = async () => {
     const query = searchParams?.search || "";
     const res = await fetch(`/api/users${query}`);
-    type userRes = { data: User[] };
     const _users_data: unknown = await res.json();
     const _users: User[] = _users_data as User[];
     setUsers(_users as User[]);
@@ -35,7 +31,7 @@ export default function Users({ searchParams }: UsersProps) {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Box sx={{ maxWidth: 800, mx: "auto", mt: 4 }}>

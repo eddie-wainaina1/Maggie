@@ -3,7 +3,7 @@ import CloseIcon from "@mui/icons-material/Close";
 
 interface PictureDisplayModalProps {
   currentImageUrl: string;
-  onClose: () => any;
+  onClose: () => void;
 }
 export const PictureDisplayModal = ({
   currentImageUrl,
@@ -26,7 +26,7 @@ export const PictureDisplayModal = ({
             <CloseIcon />
           </IconButton>
         </Box>
-        <img src={currentImageUrl} alt="product" width="100%" />
+        <img src={currentImageUrl} alt="product" width="100%" /> {/* eslint-disable-line @next/next/no-img-element */}
       </Box>
     </Modal>
   );

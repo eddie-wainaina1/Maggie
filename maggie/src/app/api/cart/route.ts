@@ -1,4 +1,3 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import { NextResponse, type NextRequest } from "next/server";
 import { getCart } from "./utils";
 import redis from "@/cache/redis";

@@ -44,7 +44,7 @@ export const CartComponent = ({ expanded }: CartProps) => {
 
   useEffect(() => {
     fetchCart();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch the cart items from the API
   const fetchCart = async () => {
