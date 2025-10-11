@@ -88,7 +88,7 @@ export const UpdateProductsModal = ({
               fullWidth
               margin="normal"
               label="Product ID"
-              value={product.productId}
+              value={product.productId ?? ""}
               disabled
             />
             <TextField
@@ -173,7 +173,14 @@ export const AddProductModal = ({
     e.preventDefault();
     const val = e.target.value;
     const field = e.target.id;
-    updateProduct(field, val);
+    // If the input type is number, convert empty string to undefined and parse numeric value
+    const inputType = (e.target as HTMLInputElement).type;
+    if (inputType === "number") {
+      const numeric = val === "" ? undefined : Number(val);
+      updateProduct(field, numeric);
+    } else {
+      updateProduct(field, val);
+    }
   };
 
   return (
@@ -196,7 +203,7 @@ export const AddProductModal = ({
             label="Name"
             type="text"
             onChange={onTextChange}
-            value={product.name}
+            value={product.name ?? ""}
             required={true}
           />
           <TextField
@@ -206,7 +213,7 @@ export const AddProductModal = ({
             label="Description"
             type="text"
             onChange={onTextChange}
-            value={product.description}
+            value={product.description ?? ""}
             required={true}
           />
           <TextField
@@ -216,7 +223,7 @@ export const AddProductModal = ({
             label="Price"
             type="number"
             onChange={onTextChange}
-            value={product.price}
+            value={product.price ?? ""}
             required={true}
           />
           <TextField
@@ -226,7 +233,7 @@ export const AddProductModal = ({
             label="In Stock"
             type="number"
             onChange={onTextChange}
-            value={product.inStock}
+            value={product.inStock ?? ""}
             required={true}
           />
           <DragDrop
