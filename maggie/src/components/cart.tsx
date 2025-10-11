@@ -67,7 +67,26 @@ export const CartComponent = ({ expanded }: CartProps) => {
         "credentials": "same-origin",
       });
       const data = await response.json();
-      setCart(data.cart);
+      const serverCart = (data.cart || {}) as Record<string, unknown>;
+      const items = Object.values(serverCart).map((p) => {
+        const prod = p as Record<string, unknown>;
+        const item: CartItem = {
+          id: (prod.id ?? prod.productId ?? "") as unknown as string,
+          productId: (prod.productId ?? String(prod.id ?? "")) as string,
+          name: (prod.name ?? "") as string,
+          price: Number(prod.price ?? 0),
+          rating: (prod.rating ?? null) as number | null,
+          description: (prod.description ?? "") as string,
+          inStock: Number(prod.inStock ?? 0),
+          imageUrl: (prod.imageUrl ?? "") as string,
+          currency: (prod.currency ?? undefined) as string | undefined,
+          quantity: Number(prod.quantity ?? 0),
+        };
+        return item;
+      });
+      // update local store and component state
+      cartStore.replaceCart(items);
+      setCart(items);
     } catch (error) {
       console.error("Failed to fetch cart:", error);
     }

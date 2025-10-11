@@ -59,7 +59,10 @@ export const cartStore = {
   async init() {
     if (typeof window === "undefined") return;
     try {
-      const res = await fetch("/api/cart", { method: "GET", credentials: "same-origin" });
+      const res = await fetch("/api/cart", {
+        method: "GET",
+        credentials: "same-origin",
+      });
       if (res.ok) {
         const json = await res.json();
         const serverCart = (json.cart || {}) as Record<string, unknown>;
