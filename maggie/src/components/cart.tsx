@@ -14,6 +14,7 @@ import {
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { getFingerprint } from "@/cache/utils";
 import type { Product } from "@/types/srcTypes";
+import { cartStore } from "@/utils/cartStore";
 
 export interface CartProps {
   expanded: boolean;
@@ -26,7 +27,7 @@ export interface CartItem extends Product {
 export type Cart = CartItem[];
 
 export const CartComponent = ({ expanded }: CartProps) => {
-  const [cart, setCart] = useState<Cart>([]);
+  const [cart, setCart] = useState<Cart>(() => cartStore.getCart());
 
   const setDeviceCookie = async () => {
     if (!Cookies.get("deviceId")) {
@@ -43,12 +44,13 @@ export const CartComponent = ({ expanded }: CartProps) => {
   };
 
   useEffect(() => {
+    // initial server sync
     fetchCart();
-    const onCartUpdated = () => fetchCart();
-    window.addEventListener("cart:updated", onCartUpdated);
-    return () => {
-      window.removeEventListener("cart:updated", onCartUpdated);
-    };
+    // subscribe to the local cart store for live updates
+    const unsubscribe = cartStore.subscribe((items) => {
+      setCart(items as Cart);
+    });
+    return unsubscribe;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch the cart items from the API
@@ -80,7 +82,8 @@ export const CartComponent = ({ expanded }: CartProps) => {
       });
 
       if (!response.ok) throw new Error("Failed to add to cart");
-      await fetchCart(); // Refresh the cart after adding
+      // sync server response into the store (for simplicity we reload server cart)
+      await fetchCart();
     } catch (error) {
       console.error("Failed to add to cart:", error);
     }

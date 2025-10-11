@@ -14,6 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { cartStore } from "@/utils/cartStore";
 
 export interface ProductCardProps {
   product: Product;
@@ -27,29 +28,31 @@ function QuantitySelector({ product }: QuantitySelectorProps) {
   const [quantity, setQuantity] = useState<number>(0);
 
   const handleIncrease = async () => {
-    await fetch(`/api/cart/quantity?productId=${encodeURIComponent(productId)}&action=increase`, {
+    const res = await fetch(`/api/cart/quantity?productId=${encodeURIComponent(productId)}&action=increase`, {
       method: "POST",
       credentials: "same-origin",
     });
-    await fetchQuantity();
-    // notify other components (like Cart) that the cart changed
-    try {
-      window.dispatchEvent(new Event("cart:updated"));
-    } catch (err) {
-      console.error("Failed to dispatch cart update event:", err);
+    if (res.ok) {
+      const data = await res.json();
+      // reflect new quantity in the local store
+      cartStore.setQuantity(productId, data.quantity ?? 0);
+      await fetchQuantity();
+    } else {
+      await fetchQuantity();
     }
   }
 
   const handleDecrease = async () => {
-    await fetch(`/api/cart/quantity?productId=${encodeURIComponent(productId)}&action=reduce`, {
+    const res = await fetch(`/api/cart/quantity?productId=${encodeURIComponent(productId)}&action=reduce`, {
       method: "POST",
       credentials: "same-origin",
     });
-    await fetchQuantity();
-    try {
-      window.dispatchEvent(new Event("cart:updated"));
-    } catch (err) {
-      console.error("Failed to dispatch cart update event:", err);
+    if (res.ok) {
+      const data = await res.json();
+      cartStore.setQuantity(productId, data.quantity ?? 0);
+      await fetchQuantity();
+    } else {
+      await fetchQuantity();
     }
   }
 
@@ -64,7 +67,7 @@ function QuantitySelector({ product }: QuantitySelectorProps) {
   };
 
   const addToCart = async () => {
-    const cartItem = {...product, quantity: 1}
+    const cartItem = { ...product, quantity: 1 }
     try {
       const response = await fetch("/api/cart", {
         method: "POST",
@@ -74,12 +77,11 @@ function QuantitySelector({ product }: QuantitySelectorProps) {
         },
         body: JSON.stringify({ product: cartItem }),
       });
-      await fetchQuantity();
-      try {
-        window.dispatchEvent(new Event("cart:updated"));
-      } catch (err) {
-        console.error("Failed to dispatch cart update event:", err);
+      if (response.ok) {
+        // Server returned success; sync into local store
+        cartStore.addItem(product, 1);
       }
+      await fetchQuantity();
       if (!response.ok) throw new Error("Failed to add to cart");
     } catch (error) {
       console.error("Failed to add to cart:", error);
@@ -161,7 +163,7 @@ export default function ProductCard({
         padding: 1,
       }}
     >
-      { /* eslint-disable-next-line @next/next/no-img-element */ }
+      { /* eslint-disable-next-line @next/next/no-img-element */}
       <img src={imageUrl} alt={`Product: ${name}`} height={285} />
       <Typography variant="h6">{name}</Typography>
       <Typography variant="body1">{description}</Typography>
