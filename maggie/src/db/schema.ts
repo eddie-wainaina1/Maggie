@@ -1,3 +1,4 @@
+import "@/lib/loadEnv";
 import mongoose from "mongoose";
 
 export const connect = async () => {

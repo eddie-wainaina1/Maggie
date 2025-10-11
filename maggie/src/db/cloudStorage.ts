@@ -1,3 +1,4 @@
+import "@/lib/loadEnv";
 import * as mongodb from "mongodb";
 
 const mongo_uri = process.env.MONGO_URI;
