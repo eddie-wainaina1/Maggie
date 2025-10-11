@@ -32,6 +32,12 @@ function QuantitySelector({ product }: QuantitySelectorProps) {
       credentials: "same-origin",
     });
     await fetchQuantity();
+    // notify other components (like Cart) that the cart changed
+    try {
+      window.dispatchEvent(new Event("cart:updated"));
+    } catch (err) {
+      console.error("Failed to dispatch cart update event:", err);
+    }
   }
 
   const handleDecrease = async () => {
@@ -40,6 +46,11 @@ function QuantitySelector({ product }: QuantitySelectorProps) {
       credentials: "same-origin",
     });
     await fetchQuantity();
+    try {
+      window.dispatchEvent(new Event("cart:updated"));
+    } catch (err) {
+      console.error("Failed to dispatch cart update event:", err);
+    }
   }
 
   const fetchQuantity = async () => {
@@ -63,7 +74,12 @@ function QuantitySelector({ product }: QuantitySelectorProps) {
         },
         body: JSON.stringify({ product: cartItem }),
       });
-      fetchQuantity();
+      await fetchQuantity();
+      try {
+        window.dispatchEvent(new Event("cart:updated"));
+      } catch (err) {
+        console.error("Failed to dispatch cart update event:", err);
+      }
       if (!response.ok) throw new Error("Failed to add to cart");
     } catch (error) {
       console.error("Failed to add to cart:", error);

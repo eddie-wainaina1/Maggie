@@ -44,6 +44,11 @@ export const CartComponent = ({ expanded }: CartProps) => {
 
   useEffect(() => {
     fetchCart();
+    const onCartUpdated = () => fetchCart();
+    window.addEventListener("cart:updated", onCartUpdated);
+    return () => {
+      window.removeEventListener("cart:updated", onCartUpdated);
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch the cart items from the API
