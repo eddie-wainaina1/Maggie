@@ -87,7 +87,7 @@ export const CartComponent = ({ expanded }: CartProps) => {
         <>
           <Typography variant="h4">Your Cart</Typography>
           <List>
-            {cart.map((item: Product) => (
+            {cart.map((item: CartItem) => (
               <ListItem
                 key={item.productId}
                 secondaryAction={
@@ -102,16 +102,24 @@ export const CartComponent = ({ expanded }: CartProps) => {
               >
                 <ListItemText
                   primary={`${item.description} - $${item.price}`}
+                  secondary={item.quantity ? `Qty: ${item.quantity}` : undefined}
                 />
               </ListItem>
             ))}
           </List>
         </>
       ) : (
-        <IconButton color="inherit">
-          <Badge badgeContent={0} color="secondary" showZero>
-            <ShoppingCartIcon />
-          </Badge>
+        <IconButton color="inherit" aria-label="cart">
+          {(() => {
+            const totalCount = Array.isArray(cart)
+              ? cart.reduce((sum, it) => sum + (it.quantity ?? 0), 0)
+              : 0;
+            return (
+              <Badge badgeContent={totalCount} color="secondary" showZero>
+                <ShoppingCartIcon />
+              </Badge>
+            );
+          })()}
         </IconButton>
       )}
     </div>
