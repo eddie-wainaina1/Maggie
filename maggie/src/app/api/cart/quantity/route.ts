@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 export async function GET(req: NextRequest) {
   const productId = req.nextUrl.searchParams.get("productId");
   const cookieStore = await cookies();
-  const deviceId = cookieStore.get('deviceId')?.value;
+  const deviceId = cookieStore.get("deviceId")?.value;
 
   if (!deviceId || !productId) {
     return NextResponse.json({ message: "Missing data" }, { status: 400 });
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const cookieStore = await cookies();
-  const deviceId = cookieStore.get('deviceId')?.value;
+  const deviceId = cookieStore.get("deviceId")?.value;
   const productId = req.nextUrl.searchParams.get("productId");
   const action = req.nextUrl.searchParams.get("action");
 
@@ -42,16 +42,16 @@ export async function POST(req: NextRequest) {
     action,
     type: typeof action,
     length: action?.length,
-    chars: [...action || ""].map(c => c.charCodeAt(0))
+    chars: [...(action || "")].map((c) => c.charCodeAt(0)),
   });
-  if (action?.trim()=="reduce") {
+  if (action?.trim() == "reduce") {
     product.quantity -= 1;
   } else {
     product.quantity += 1;
   }
 
   if (product.quantity <= 0) {
-    delete cart[productId]
+    delete cart[productId];
   }
   const serialized = JSON.stringify(cart);
   const MAX_CART_BYTES = 150 * 1024; // 150KB

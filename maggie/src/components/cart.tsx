@@ -31,9 +31,16 @@ export const CartComponent = ({ expanded }: CartProps) => {
   const setDeviceCookie = async () => {
     if (!Cookies.get("deviceId")) {
       const fp = await getFingerprint();
-      Cookies.set('deviceId', fp, { expires: 7, path: '/' }); // 7-day expiry
+      // Set secure flag when on HTTPS, and use sameSite lax to reduce CSRF risk
+      const secureFlag = typeof window !== "undefined" && window.location.protocol === "https:";
+      Cookies.set("deviceId", fp, {
+        expires: 7,
+        path: "/",
+        secure: secureFlag,
+        sameSite: "lax",
+      }); // 7-day expiry
     }
-  }
+  };
 
   useEffect(() => {
     fetchCart();

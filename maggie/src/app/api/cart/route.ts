@@ -6,10 +6,13 @@ import { cookies } from "next/headers";
 
 export async function GET() {
   const cookieStore = await cookies();
-  const deviceId = cookieStore.get('deviceId')?.value;
+  const deviceId = cookieStore.get("deviceId")?.value;
 
   if (!deviceId) {
-    return NextResponse.json({ message: "An unexpected error occurred!!" }, { status: 400 });
+    return NextResponse.json(
+      { message: "An unexpected error occurred!!" },
+      { status: 400 },
+    );
   }
 
   const cart = await getCart(deviceId);
@@ -18,10 +21,13 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const cookieStore = await cookies();
-  const deviceId = cookieStore.get('deviceId')?.value;
+  const deviceId = cookieStore.get("deviceId")?.value;
 
   if (!deviceId) {
-    return NextResponse.json({ message: "An unexpected error occured!!" }, { status: 400 });
+    return NextResponse.json(
+      { message: "An unexpected error occured!!" },
+      { status: 400 },
+    );
   }
   const body = await req.json();
   const { product } = body;

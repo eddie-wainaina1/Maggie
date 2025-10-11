@@ -38,7 +38,10 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     if (!file) {
-      return NextResponse.json({ error: "No files received." }, { status: 400 });
+      return NextResponse.json(
+        { error: "No files received." },
+        { status: 400 },
+      );
     }
 
     // Validate file type and size (public endpoint but must guard abuse)
