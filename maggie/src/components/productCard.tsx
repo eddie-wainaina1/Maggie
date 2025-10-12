@@ -20,10 +20,10 @@ export interface ProductCardProps {
   product: Product;
 }
 
-interface QuantitySelectorProps {
+export interface QuantitySelectorProps {
   product: Product;
 }
-function QuantitySelector({ product }: QuantitySelectorProps) {
+export function QuantitySelector({ product }: QuantitySelectorProps) {
   const productId = product.id.toString();
   const [quantity, setQuantity] = useState<number>(0);
 

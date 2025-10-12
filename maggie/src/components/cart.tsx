@@ -5,6 +5,8 @@ import Cookies from 'js-cookie';
 import {
   Badge,
   Button,
+  Box,
+  Drawer,
   IconButton,
   List,
   ListItem,
@@ -12,6 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { QuantitySelector } from "./productCard";
 import { getFingerprint } from "@/cache/utils";
 import type { Product } from "@/types/srcTypes";
 import { cartStore } from "@/utils/cartStore";
@@ -29,6 +32,7 @@ export type Cart = CartItem[];
 export const CartComponent = ({ expanded }: CartProps) => {
   // start with empty array so server-render and initial client render match
   const [cart, setCart] = useState<Cart>([]);
+  const [open, setOpen] = useState(false);
 
   const setDeviceCookie = async () => {
     if (!Cookies.get("deviceId")) {
@@ -79,7 +83,7 @@ export const CartComponent = ({ expanded }: CartProps) => {
           description: (prod.description ?? "") as string,
           inStock: Number(prod.inStock ?? 0),
           imageUrl: (prod.imageUrl ?? "") as string,
-          currency: (prod.currency ?? undefined) as string | undefined,
+          currency: (prod.currency ?? "KSH") as string | undefined,
           quantity: Number(prod.quantity ?? 0),
         };
         return item;
@@ -93,68 +97,145 @@ export const CartComponent = ({ expanded }: CartProps) => {
   };
 
   // Add a product to the cart
-  const updateCart = async (product: Product) => {
-    await setDeviceCookie();
-    try {
-      const response = await fetch("/api/cart", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ product }),
-      });
+  // NOTE: adding to cart is handled elsewhere (cartStore.addItem / server API).
 
-      if (!response.ok) throw new Error("Failed to add to cart");
-      // sync server response into the store (for simplicity we reload server cart)
-      await fetchCart();
-    } catch (error) {
-      console.error("Failed to add to cart:", error);
+  const totalCount = Array.isArray(cart)
+    ? cart.reduce((sum, it) => sum + (it.quantity ?? 0), 0)
+    : 0;
+
+  const currencyFormat = (amount: number, currency?: string) => {
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: currency ?? "KSH",
+        maximumFractionDigits: 2,
+      }).format(amount);
+    } catch {
+      return `${currency ?? "KSH"}${amount.toFixed(2)}`;
     }
   };
 
+  const totalPrice = Array.isArray(cart)
+    ? cart.reduce((sum, it) => sum + (Number(it.price ?? 0) * Number(it.quantity ?? 0)), 0)
+    : 0;
+
+  // Determine currency to use for the total: if all items share the same currency, use it.
+  const totalCurrency = (() => {
+    if (!Array.isArray(cart) || cart.length === 0) return undefined;
+    const currencies = Array.from(
+      new Set(
+        cart
+          .map((it) => it.currency)
+          .filter((c): c is string => typeof c === "string" && c.length > 0)
+      )
+    );
+    return currencies.length === 1 ? currencies[0] : undefined;
+  })();
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const CartList = (
+    <Box sx={{ width: 360, p: 2 }} role="presentation">
+      <Typography variant="h6" gutterBottom>
+        Your Cart
+      </Typography>
+      <List>
+        {cart.length === 0 ? (
+          <ListItem>
+            <ListItemText primary="Your cart is empty" />
+          </ListItem>
+        ) : (
+          cart.map((item: CartItem) => {
+            const ppu = Number(item.price ?? 0);
+            const qty = Number(item.quantity ?? 0);
+            const subtotal = ppu * qty;
+            return (
+              <ListItem key={item.productId} sx={{ alignItems: 'flex-start' }}>
+                <Box sx={{ width: '100%' }}>
+                  <Typography variant="subtitle2" gutterBottom fontWeight={700}>{item.name ?? item.description}</Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography variant="body2">Price: {currencyFormat(ppu, item.currency)}</Typography>
+                    <Typography variant="body2">Qty: {qty}</Typography>
+                    <Typography variant="body2">Subtotal: {currencyFormat(subtotal, item.currency)}</Typography>
+                    <Box sx={{ display: 'flex', gap: 1, mt: 1, alignItems: 'center' }}>
+                      <QuantitySelector product={item} />
+                      <Box sx={{ flex: 1 }} />
+                    </Box>
+                  </Box>
+                </Box>
+              </ListItem>
+            );
+          })
+        )}
+      </List>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 2 }}>
+        <Typography variant="subtitle1">Total:</Typography>
+        <Typography variant="subtitle1" fontWeight={700}>{currencyFormat(totalPrice, totalCurrency)}</Typography>
+      </Box>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}>
+        <Button variant="outlined" onClick={handleClose}>
+          Close
+        </Button>
+        <Button variant="contained" color="primary" onClick={() => { /* TODO: navigate to checkout */ }}>
+          Checkout
+        </Button>
+      </Box>
+    </Box>
+  );
+
   return (
-    <div style={{ padding: "20px" }}>
+    <Box sx={{ p: '20px' }}>
       {expanded ? (
-        <>
+        // full page cart (existing behavior)
+        <Box sx={{ p: '20px' }}>
           <Typography variant="h4">Your Cart</Typography>
           <List>
-            {cart.map((item: CartItem) => (
-              <ListItem
-                key={item.productId}
-                secondaryAction={
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => updateCart(item)}
-                  >
-                    Remove
-                  </Button>
-                }
-              >
-                <ListItemText
-                  primary={`${item.description} - $${item.price}`}
-                  secondary={item.quantity ? `Qty: ${item.quantity}` : undefined}
-                />
+            {cart.length === 0 ? (
+              <ListItem>
+                <ListItemText primary="Your cart is empty" />
               </ListItem>
-            ))}
+            ) : (
+              cart.map((item: CartItem) => {
+                const ppu = Number(item.price ?? 0);
+                const qty = Number(item.quantity ?? 0);
+                const subtotal = ppu * qty;
+                return (
+                  <ListItem key={item.productId} sx={{ alignItems: 'flex-start' }}>
+                    <Box sx={{ width: '100%' }}>
+                      <Typography variant="subtitle1" gutterBottom fontWeight={700}>{item.name ?? item.description}</Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Typography variant="body2">Price: {currencyFormat(ppu, item.currency)}</Typography>
+                        <Typography variant="body2">Qty: {qty}</Typography>
+                        <Typography variant="body2">Subtotal: {currencyFormat(subtotal, item.currency)}</Typography>
+                        <Box sx={{ display: 'flex', gap: 1, mt: 1, alignItems: 'center' }}>
+                          <QuantitySelector product={item} />
+                          <Box sx={{ flex: 1 }} />
+                        </Box>
+                      </Box>
+                    </Box>
+                  </ListItem>
+                );
+              })
+            )}
           </List>
-        </>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+            <Typography variant="h6" fontWeight={700}>Total: {currencyFormat(totalPrice, totalCurrency)}</Typography>
+          </Box>
+        </Box>
       ) : (
-        <IconButton color="inherit" aria-label="cart">
-          {(() => {
-            const totalCount = Array.isArray(cart)
-              ? cart.reduce((sum, it) => sum + (it.quantity ?? 0), 0)
-              : 0;
-            return (
-              <Badge badgeContent={totalCount} color="secondary" showZero>
-                <ShoppingCartIcon />
-              </Badge>
-            );
-          })()}
-        </IconButton>
+        <>
+          <IconButton color="inherit" aria-label="cart" onClick={handleOpen}>
+            <Badge badgeContent={totalCount} color="secondary" showZero>
+              <ShoppingCartIcon />
+            </Badge>
+          </IconButton>
+          <Drawer anchor="right" open={open} onClose={handleClose}>
+            {CartList}
+          </Drawer>
+        </>
       )}
-    </div>
+    </Box>
   );
 };
 

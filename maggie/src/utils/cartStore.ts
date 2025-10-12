@@ -78,7 +78,7 @@ export const cartStore = {
             description: (prod.description ?? "") as string,
             inStock: Number(prod.inStock ?? 0),
             imageUrl: (prod.imageUrl ?? "") as string,
-            currency: (prod.currency ?? undefined) as string | undefined,
+            currency: (prod.currency ?? "KSH") as string | undefined,
             quantity: Number(prod.quantity ?? 0),
           };
           return item;
