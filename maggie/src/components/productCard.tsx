@@ -25,7 +25,12 @@ export interface QuantitySelectorProps {
 }
 export function QuantitySelector({ product }: QuantitySelectorProps) {
   const productId = product.id.toString();
-  const [quantity, setQuantity] = useState<number>(0);
+  const getLocalQuantity = () => {
+    const local = cartStore.getCart().find((c) => (c.productId ?? String(c.id)) === productId);
+    return local ? Number(local.quantity ?? 0) : 0;
+  };
+
+  const [quantity, setQuantity] = useState<number>(getLocalQuantity());
 
   const handleIncrease = async () => {
     const res = await fetch(`/api/cart/quantity?productId=${encodeURIComponent(productId)}&action=increase`, {
@@ -89,7 +94,13 @@ export function QuantitySelector({ product }: QuantitySelectorProps) {
   };
 
   useEffect(() => {
+    // initialize from server and local store
     fetchQuantity();
+    const unsubscribe = cartStore.subscribe((items) => {
+      const found = items.find((c) => (c.productId ?? String(c.id)) === productId);
+      setQuantity(found ? Number(found.quantity ?? 0) : 0);
+    });
+    return unsubscribe;
   }, [productId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
